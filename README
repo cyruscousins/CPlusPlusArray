@@ -1,0 +1,5 @@
+This is a C++ array management templated header library.
+
+array.hpp provides a lightweight templated array class.  It provides a convenient way to encapsulate a pointer with its size, as well as basic functionality such as equality testing and allocation, in addition to more advanced functionality in the form of higher order operators, such as filter and map.  A convenient and (relatively) safe (through const) method of parallelization is provided via the mapParallel function.
+
+vectormath.hpp provides functions over (mathematical) vectors, such as min, max, stdev, and various distance metrics and norms.

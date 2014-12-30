@@ -70,7 +70,7 @@ template <typename T> struct Array {
     out << "}";
   }
 
-  //Slicers
+  //Functional Creators
 
   Array<T> operator+(unsigned addand) { //Technically this could be const, but such would seem to violate the spirit of the thing.
     return Array<T>(data + addand, length - addand);
@@ -79,6 +79,17 @@ template <typename T> struct Array {
   //Gives a new array from [first, last)
   Array<T> slice(unsigned first, unsigned last){
     return Array<T>(data + first, last - first);
+  }
+
+  //Head and tail, to operate like a functional list.
+  T head(){
+    assert(length > 0);
+    return data[0];
+  }
+
+  Array<T> tail() {
+    assert(length > 0);
+    return Array(data + 1, length - 1);
   }
 
   //Mutators  
@@ -145,10 +156,9 @@ template <typename T> struct Array {
   
   //Parallelized Map
   
-  template<class U> Array<U> mapParallel(U (*f)(const T)) const {
+  template<class U> Array<U> mapParallel(U (*f)(const T), unsigned threadCount, unsigned minToMultithread) const {
     //Launch new threads, each doing their own map.
-    unsigned threadCount = 8;
-    if(length < threadCount){
+    if(length < minToMultithread){
       return map(f);
     }
     
@@ -172,6 +182,10 @@ template <typename T> struct Array {
     });
 
     return result; 
+  }
+
+  template<class U> Array<U> mapParallel(U (*f)(const T)) const {
+    return mapParallel(f, 8, 16); //Defaults
   }
   
   
@@ -204,7 +218,6 @@ template <typename T> struct Array {
     return newArr;
   }
   
-  //TODO const higher order functions.
   template<typename ResultTy> ResultTy fold(ResultTy (*f)(const ResultTy zero, const T next), ResultTy zero) const{
     ResultTy acc = zero;
     for(unsigned i = 0; i < length; i++){
@@ -220,6 +233,25 @@ template <typename T> struct Array {
     }
     return acc;
   }
+
+  //Given a commutative function f, fold a list of A into a single A.
+  T foldUnordered(T (*f)(const T t0, const T t1)) const{
+    assert(length > 0);
+    if(length == 1) return data[0];
+    else{
+      assert(f(data[0], data[1]) == f(data[1], data[0])); //Assert commutativity (this check is necessary but not sufficient).
+      return f(data[0], tail().foldUnordered(f));
+    }
+  }
+  template<typename Closure> T foldUnordered(T (*f)(const T t0, const T t1, const Closure cl), const Closure cl) const{
+    assert(length > 0);
+    if(length == 1) return data[0];
+    else{
+      assert(f(data[0], data[1], cl) == f(data[1], data[0], cl)); //Assert commutativity (this check is necessary but not sufficient).
+      return f(data[0], tail().foldUnordered(f));
+    }
+  }
+
 };
 
 template <typename T> std::ostream& operator<<(std::ostream& o, const Array<T>& arr){
