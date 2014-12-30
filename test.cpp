@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cmath>
 #include "array.hpp"
-
+#include "vectormath.hpp"
 
 Array<int> count(unsigned count){
   int* data = new int[count];
