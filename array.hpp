@@ -38,25 +38,74 @@ template <typename T> struct Array {
 
   //Accessors
   T & operator[](unsigned index) const {
-    //#ifdef DEBUG //necessary?
     assert(index < length); //The type system takes care of negative indices.
-    //#endif
     return data[index];
   }
-  
-  /*
-  T* operator+(unsigned addand){
-      return data + addand;
+
+  //Equality
+
+  bool operator==(const Array<T> other) const {
+    if(length != other.length) return false;
+    for(unsigned i = 0; i < length; i++){
+      if(data[i] != other[i]) return false;
+    }
+    return true;
   }
-   */
+
+  bool operator!=(const Array<T> other) const {
+    return !operator==(other);
+  }
+
+  //IO
   
+  void writeToStream(std::ostream& out) const {
+    if(length == 0){
+      out << "{}" << std::endl;
+      return;
+    }
+    out << "{" << data[0];
+    for(unsigned i = 1; i < length; i++){
+      out << ", " << data[i];
+    }
+    out << "}";
+  }
+
+  //Slicers
+
+  Array<T> operator+(unsigned addand) { //Technically this could be const, but such would seem to violate the spirit of the thing.
+    return Array<T>(data + addand, length - addand);
+  }
+
+  //Gives a new array from [first, last)
+  Array<T> slice(unsigned first, unsigned last){
+    return Array<T>(data + first, last - first);
+  }
+
+  //Mutators  
+
   //Sort
   void sort(){
     std::sort(data, data + length);
   }
   
   //Functional Operators:
+
+  //Predicates
+
+  bool conjunction(bool (*f)(const T)) const{
+    for(unsigned i = 0; i < length; i++){
+      if(!f(data[i])) return false;
+    }
+    return true;
+  }
   
+  bool disjunction(bool (*f)(const T)) const{
+    for(unsigned i = 0; i < length; i++){
+      if(f(data[i])) return true;
+    }
+    return false;
+  }
+
   ////////////
   //MAP FAMILY
   
@@ -96,7 +145,6 @@ template <typename T> struct Array {
   
   //Parallelized Map
   
-  
   template<class U> Array<U> mapParallel(U (*f)(const T)) const {
     //Launch new threads, each doing their own map.
     unsigned threadCount = 8;
@@ -105,14 +153,25 @@ template <typename T> struct Array {
     }
     
     Array<U> result = Array<U>(length);
+
+    std::vector<std::thread> threads;
+    threads.reserve(threadCount);
+
     for(unsigned i = 0; i < threadCount; i++){
       unsigned start = (i * length) / threadCount;
       unsigned finish = ((i + 1) * length) / threadCount;
-      unsigned sublen = finish - start;
+      unsigned subLen = finish - start;
       
-      //TODO: Ship this to a new thread.
-      Array(data + start, sublen).mapTo(Array<U>(result.data + start, subLen));
+      threads.push_back(std::thread([this, f, start, subLen, result](){Array(data + start, subLen).mapTo(f, Array<U>(result.data + start, subLen));}));
     }
+
+    //TODO have the main thread work too?
+    std::for_each(threads.begin(), threads.end(), [](std::thread &t) 
+    {
+      t.join();
+    });
+
+    return result; 
   }
   
   
@@ -162,6 +221,11 @@ template <typename T> struct Array {
     return acc;
   }
 };
+
+template <typename T> std::ostream& operator<<(std::ostream& o, const Array<T>& arr){
+  arr.writeToStream(o);
+  return o;
+}
 
 //Due to a very interesting design decision, vector<bool> is implemented as a bit array.
 typedef std::vector<bool> BitArray;
