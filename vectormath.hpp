@@ -256,7 +256,6 @@ template<typename T> T entropy(T* data, unsigned len){
 template<typename T> void scalarMultiplyInPlace(Array<T> arr){
   scalarMultiplyInPlace(arr.data, arr.length);
 }
-
 template<typename T> void scalarMultiplyInPlace(T* data, unsigned len, T scalar){
   for(unsigned i = 0; i < len; i++){
     data[i] *= scalar;
@@ -407,7 +406,21 @@ template<typename T> T pcc(T* x, T* y, unsigned len){
 //VECTOR BASED//
 ////////////////
 
-//TODO Array equivalent.
+template<typename T> void vectorMean(Array<T> out, Array<Array<T>> in){
+  for(unsigned i = 0; i < out.length; i++){
+    out[i] = 0;
+  }
+  for(unsigned i = 0; i < in.length; i++){
+    assert(in[i].length == out.length);
+    for(unsigned j = 0; j < out.length; j++){
+      out[j] += in[i][j];
+    } 
+  }
+  for(unsigned i = 0; i < out.length; i++){
+    out[i] /= in.length;
+  }
+}
+
 template<typename T> void vectorMean(T* out, T** in, unsigned vLen, unsigned vCount){
   for(unsigned i = 0; i < vLen; i++){
     out[i] = 0;
@@ -466,8 +479,9 @@ template<typename T> void arrayCopy(T* d, T* s, unsigned len){
 }
 
 //Copies an array into new memory
-template<typename T> void arrayCopy(Array<T> arr0){
-  arrayCopy(arr0.data, Array<T>(arr0.length), arr0.length);
+template<typename T> Array<T> arrayCopy(Array<T> arr0){
+  T* newData = arrayCopy(arr0.data, Array<T>(arr0.length), arr0.length);
+  return Array<T>(newData, arr0.length);
 }
 template<typename T> T* arrayCopy(T* s, unsigned len){
   T* d = new T[len];
