@@ -11,6 +11,8 @@
 #include <cmath>
 #include <assert.h>
 
+#include "array.hpp"
+
 ///////
 //MAX//
 ///////
@@ -479,9 +481,10 @@ template<typename T> void arrayCopy(T* d, T* s, unsigned len){
 }
 
 //Copies an array into new memory
-template<typename T> Array<T> arrayCopy(Array<T> arr0){
-  T* newData = arrayCopy(arr0.data, Array<T>(arr0.length), arr0.length);
-  return Array<T>(newData, arr0.length);
+template<typename T> Array<T> arrayCopy(Array<T> src){
+  Array<T> dest = Array<T>(src.length);
+  arrayCopy(dest, src);
+  return dest;
 }
 template<typename T> T* arrayCopy(T* s, unsigned len){
   T* d = new T[len];

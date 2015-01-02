@@ -2,6 +2,7 @@
 #define ARRAY_H
 
 #include <vector>
+#include <ostream>
 
 #include <assert.h>
 #include <algorithm>
@@ -14,7 +15,7 @@ template <typename T> struct Array {
   T* data;
   
   //Constructors
-  Array(unsigned length, T* data) : length(length), data(data) { } //This seems backwards.
+  Array(unsigned length, T* data) : length(length), data(data) { }
   Array(T* data, unsigned length) : length(length), data(data) { }
   
   //Empty array (Warning: No initialization)
@@ -133,14 +134,13 @@ template <typename T> struct Array {
       return out;
   }
   
-  Array<T> mapInPlace(T (*f)(const T)) const{
+  Array<T> mapInPlace(T (*f)(const T)) {
       mapTo(f, this);
   }
   
   //TODO: Implement maps in terms of mapCls?
   //Would compiler handle it gracefully?
   
-  //TODO: Why are closures always pointers?  Is this the best way to do it?
   template<class U, class V> Array<U> map( U (*f)(const T, const V cl), const V cl) const{
       Array<U> newArr = Array<U>(length);
       return mapTo(f, cl, newArr);
@@ -187,7 +187,13 @@ template <typename T> struct Array {
   template<class U> Array<U> mapParallel(U (*f)(const T)) const {
     return mapParallel(f, 8, 16); //Defaults
   }
-  
+ 
+  //For Each
+  void forEach(void (*f)(T)) {
+    for(unsigned i = 0; i < length; i++){
+      f(data[i]);
+    }
+  }
   
   ////////////
   //OTHER FUNCTIONAL OPERATORS
