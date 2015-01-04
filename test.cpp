@@ -59,6 +59,15 @@ bool testPredicates(){
 	
 }
 
+bool testSliceLikes(){
+	Array<int> test = count(100);
+	return (head(test) == 0)
+            && (head(tail(test)) == 1)
+            && (head(tail(tail(test))) == 2)
+            && (head(test + 3) == 3)
+            && (head(slice(test, 4, 5)) == 4);
+}
+
 int main(){
 	if(!testMap()){
 		std::cout << "Map error." << std::endl;
@@ -71,5 +80,8 @@ int main(){
 	}
 	if(!testPredicates()){
 		std::cout << "Filter error." << std::endl;
+	}
+	if(!testSliceLikes()){
+		std::cout << "Slice likes error." << std::endl;
 	}
 }

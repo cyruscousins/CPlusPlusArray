@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <algorithm>
 #include <thread>
+#include <random>
 
 //This templated array class allows some classic higher order functions, and optionally provides some run time safety with bounds checking.
 template <typename T> struct Array {
@@ -74,11 +75,14 @@ template <typename T> struct Array {
   //Functional Creators
 
   Array<T> operator+(unsigned addand) { //Technically this could be const, but such would seem to violate the spirit of the thing.
+    assert(addand <= length);
     return Array<T>(data + addand, length - addand);
   }
 
   //Gives a new array from [first, last)
   Array<T> slice(unsigned first, unsigned last){
+    assert(first <= length);
+    assert(last <= length);
     return Array<T>(data + first, last - first);
   }
 
@@ -95,9 +99,14 @@ template <typename T> struct Array {
 
   //Mutators  
 
-  //Sort
+  //Sort the contents of the array using its < operator.
   void sort(){
     std::sort(data, data + length);
+  }
+
+  //Shuffle the contents of the array with a random number generator.
+  template <class URNG> void shuffle(URNG&& r){
+    std::shuffle(data, data + length, r);
   }
   
   //Functional Operators:
@@ -264,6 +273,20 @@ template <typename T> std::ostream& operator<<(std::ostream& o, const Array<T>& 
   arr.writeToStream(o);
   return o;
 }
+
+//Some people want to use these operators and don't like OOP.
+template <typename T> T head(Array<T> arr){
+	return arr.head();
+}
+
+template <typename T> Array<T> tail(Array<T> arr){
+	return arr.tail();
+}
+
+template <typename T> Array<T> slice(Array<T> arr, unsigned s, unsigned e){
+	return arr.slice(s, e);
+}
+
 
 //Due to a very interesting design decision, vector<bool> is implemented as a bit array.
 typedef std::vector<bool> BitArray;
