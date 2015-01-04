@@ -73,10 +73,14 @@ template <typename T> struct Array {
   }
 
   //Functional Creators
+  Array<T> slice(unsigned first) { //Technically this could be const, but such would seem to violate the spirit of the thing.
+    assert(first <= length);
+    return Array<T>(data + first, length - first);
+  }
 
-  Array<T> operator+(unsigned addand) { //Technically this could be const, but such would seem to violate the spirit of the thing.
-    assert(addand <= length);
-    return Array<T>(data + addand, length - addand);
+  //Basically alternative syntax to slice, more C like.
+  Array<T> operator+(unsigned addand) {
+    return slice(addand);
   }
 
   //Gives a new array from [first, last)
@@ -95,6 +99,16 @@ template <typename T> struct Array {
   Array<T> tail() {
     assert(length > 0);
     return Array(data + 1, length - 1);
+  }
+
+  Array<T> take(unsigned count) {
+    assert(count <= length);
+    return Array<T>(data, count);
+  }
+
+  Array<T> drop(unsigned count) {
+    assert(count <= length);
+    return Array<T>(data + count, length - count);
   }
 
   //Mutators  

@@ -68,6 +68,11 @@ bool testSliceLikes(){
             && (head(slice(test, 4, 5)) == 4);
 }
 
+bool testTakeDrop(){
+	Array<int> test = count(100);
+	return sumTerms(test) == sumTerms(test.take(50)) + sumTerms(test.drop(50));
+}
+
 int main(){
 	if(!testMap()){
 		std::cout << "Map error." << std::endl;
