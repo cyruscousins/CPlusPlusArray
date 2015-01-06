@@ -51,21 +51,20 @@ bool testPredicates(){
 	int test[5] = {1, 3, 5, 7};
 	Array<int> testArr(test, 4);
 
-	return
-		testArr.conjunction([](int v){return v % 2 == 1;})
-	    && !testArr.conjunction([](int v){return v < 4;})
-	    &&  testArr.disjunction([](int v){return v == 1;})
-	    && !testArr.disjunction([](int v){return v == 2;});
+	return testArr.conjunction([](int v){return v % 2 == 1;})
+	   && !testArr.conjunction([](int v){return v < 4;})
+	   &&  testArr.disjunction([](int v){return v == 1;})
+	   && !testArr.disjunction([](int v){return v == 2;});
 	
 }
 
 bool testSliceLikes(){
 	Array<int> test = count(100);
 	return (head(test) == 0)
-            && (head(tail(test)) == 1)
-            && (head(tail(tail(test))) == 2)
-            && (head(test + 3) == 3)
-            && (head(slice(test, 4, 5)) == 4);
+     &&  (head(tail(test)) == 1)
+     &&  (head(tail(tail(test))) == 2)
+     &&  (head(test + 3) == 3)
+     &&  (head(slice(test, 4, 5)) == 4);
 }
 
 bool testTakeDrop(){
@@ -92,6 +91,18 @@ bool testZip(){
   return result.conjunction([](float val){return val == 1;});
 }
 
+bool testFold(){
+  double data[4] = {2, -2, 2, -2};
+  Array<double> arr = Array<double>(data, 4);  
+
+  double length = arr.foldUnordered([](double a, double b){return sqrt(a * a + b * b);});
+  
+  double length2 = sqrt(arr.fold<double>([](double sum, double next){return sum + next * next;}, 0));
+  
+  return length == 4
+     &&  length2 == 4;
+}
+
 int main(){
 	if(!testMap()){
 		std::cout << "Map error." << std::endl;
@@ -113,5 +124,8 @@ int main(){
 	}
 	if(!testZip()){
 		std::cout << "Zip error." << std::endl;
+	}
+	if(!testFold()){
+		std::cout << "Fold error." << std::endl;
 	}
 }

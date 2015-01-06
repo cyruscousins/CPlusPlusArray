@@ -98,12 +98,12 @@ template <typename T> struct Array {
   }
 
   //Head and tail, to operate like a functional list.
-  T head(){
+  T head() const {
     assert(length > 0);
     return data[0];
   }
 
-  Array<T> tail() {
+  Array<T> tail() const {
     assert(length > 0);
     return Array(data + 1, length - 1);
   }
@@ -323,11 +323,11 @@ template <typename T> std::ostream& operator<<(std::ostream& o, const Array<T>& 
 }
 
 //Some people want to use these operators and don't like OOP.
-template <typename T> T head(Array<T> arr){
+template <typename T> T head(const Array<T> arr){
 	return arr.head();
 }
 
-template <typename T> Array<T> tail(Array<T> arr){
+template <typename T> Array<T> tail(const Array<T> arr){
 	return arr.tail();
 }
 
