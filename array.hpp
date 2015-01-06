@@ -24,6 +24,13 @@ template <typename T> struct Array {
     data = new T[length];
   }
   
+  //Initialize array to value
+  Array(unsigned length, T val) : Array(length) {
+    for(unsigned i = 0; i < length; i++){
+      data[i] = val;
+    }
+  }
+  
   //Copy from a vector
   Array(std::vector<T>& vec){
     length = vec.size();
@@ -31,7 +38,7 @@ template <typename T> struct Array {
     arrayCopy(data, vec.data(), length);
   }
   
-  void freeData(){
+  void freeMemory(){
     delete [] data;
   }
   
@@ -212,7 +219,7 @@ template <typename T> struct Array {
   }
  
   //For Each
-  void forEach(void (*f)(T)) {
+  void forEach(void (*f)(T&)) {
     for(unsigned i = 0; i < length; i++){
       f(data[i]);
     }
@@ -231,8 +238,9 @@ template <typename T> struct Array {
       }
     }
     newArr.length = ni;
+    //Need a C++ equivalent of this:
+    //newArr.data = (T*)realloc(newArr.data, ni);
     return newArr;
-    //TODO consider a realloc?
   }
   
   template<typename Cl> Array<T> filter(bool (*f)(const T t, const Cl), const Cl cl) const{
@@ -279,6 +287,32 @@ template <typename T> struct Array {
       assert(f(data[0], data[1], cl) == f(data[1], data[0], cl)); //Assert commutativity (this check is necessary but not sufficient).
       return f(data[0], tail().foldUnordered(f));
     }
+  }
+  
+  //Zip
+  
+  template<typename OtherTy, typename ResTy> Array<ResTy> zip(const Array<OtherTy> other, ResTy (*f)(const T, const OtherTy)) const {
+
+    assert(length == other.length);
+    
+    Array<ResTy> result = Array<ResTy>(length);
+    for(unsigned i = 0; i < length; i++){
+      result[i] = f(data[i], other[i]);
+    }
+    
+    return result;
+  }
+  
+  template<typename OtherTy, typename ResTy, typename ClosureTy> Array<ResTy> zip(const Array<OtherTy> other, ResTy (*f)(const T, const OtherTy, const ClosureTy), const ClosureTy cl) const {
+
+    assert(length == other.length);
+    
+    Array<ResTy> result = Array<ResTy>(length);
+    for(unsigned i = 0; i < length; i++){
+      result[i] = f(data[i], other[i], cl);
+    }
+    
+    return result;
   }
 
 };

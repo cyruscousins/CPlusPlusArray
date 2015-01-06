@@ -73,6 +73,25 @@ bool testTakeDrop(){
 	return sumTerms(test) == sumTerms(test.take(50)) + sumTerms(test.drop(50));
 }
 
+bool testForEach(){
+  Array<int> test = Array<int>(100, 0);
+  test.forEach([](int& i){i = i + 1;});
+  for(unsigned i = 0; i < 100; i++){
+    if(test[i] != 1) return false;
+  }
+  return true;
+}
+
+bool testZip(){
+  Array<int> test0 = Array<int>(10, 2);
+  Array<double> test1 = Array<double>(10, 1);
+  double cl = .5;
+  
+  Array<float> result = test0.zip<double, float, double>(test1, [](int a, double b, double cl){return (float) (a * b * cl);}, cl);
+  
+  return result.conjunction([](float val){return val == 1;});
+}
+
 int main(){
 	if(!testMap()){
 		std::cout << "Map error." << std::endl;
@@ -88,5 +107,11 @@ int main(){
 	}
 	if(!testSliceLikes()){
 		std::cout << "Slice likes error." << std::endl;
+	}
+	if(!testForEach()){
+		std::cout << "For each error." << std::endl;
+	}
+	if(!testZip()){
+		std::cout << "Zip error." << std::endl;
 	}
 }
