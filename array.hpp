@@ -35,7 +35,9 @@ template <typename T> struct Array {
   Array(std::vector<T>& vec){
     length = vec.size();
     data = new T[length];
-    arrayCopy(data, vec.data(), length);
+    for(unsigned i = 0; i < length; i++){
+      data[i] = vec[i];
+    }
   }
   
   void freeMemory(){
@@ -167,10 +169,9 @@ template <typename T> struct Array {
   Array<T> mapInPlace(T (*f)(const T)) {
       mapTo(f, this);
   }
-  
-  //TODO: Implement maps in terms of mapCls?
-  //Would compiler handle it gracefully?
-  
+
+ 
+  //With closure: 
   template<class U, class V> Array<U> map( U (*f)(const T, const V cl), const V cl) const{
       Array<U> newArr = Array<U>(length);
       return mapTo(f, cl, newArr);
@@ -205,7 +206,7 @@ template <typename T> struct Array {
       threads.push_back(std::thread([this, f, start, subLen, result](){Array(data + start, subLen).mapTo(f, Array<U>(result.data + start, subLen));}));
     }
 
-    //TODO have the main thread work too?
+    //Optimization: have the main thread work too?
     std::for_each(threads.begin(), threads.end(), [](std::thread &t) 
     {
       t.join();
@@ -222,6 +223,13 @@ template <typename T> struct Array {
   void forEach(void (*f)(T&)) {
     for(unsigned i = 0; i < length; i++){
       f(data[i]);
+    }
+  }
+
+  //Note that not even the closure is const here: this is in keeping with the inherently imperative nature of forEach.
+  template<class ClosureTy> void forEach(void (*f)(T&, ClosureTy cl), ClosureTy cl) {
+    for(unsigned i = 0; i < length; i++){
+      f(data[i], cl);
     }
   }
   
