@@ -143,9 +143,23 @@ template <typename T> struct Array {
     return true;
   }
   
+  template<typename Cl> bool conjunction(bool (*f)(const T, const Cl), const Cl cl) const{
+    for(unsigned i = 0; i < length; i++){
+      if(!f(data[i], cl)) return false;
+    }
+    return true;
+  }
+  
   bool disjunction(bool (*f)(const T)) const{
     for(unsigned i = 0; i < length; i++){
       if(f(data[i])) return true;
+    }
+    return false;
+  }
+  
+  template<typename Cl> bool disjunction(bool (*f)(const T, const Cl), const Cl cl) const{
+    for(unsigned i = 0; i < length; i++){
+      if(f(data[i], cl)) return true;
     }
     return false;
   }

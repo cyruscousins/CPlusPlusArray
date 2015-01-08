@@ -54,7 +54,10 @@ bool testPredicates(){
 	return testArr.conjunction([](int v){return v % 2 == 1;})
 	   && !testArr.conjunction([](int v){return v < 4;})
 	   &&  testArr.disjunction([](int v){return v == 1;})
-	   && !testArr.disjunction([](int v){return v == 2;});
+	   && !testArr.disjunction([](int v){return v == 2;})
+	   
+	   &&  testArr.conjunction<int>([](int v, int cl){return v % 2 == cl;}, 1)
+	   && !testArr.disjunction<int>([](int v, int cl){return v % 2 == cl;}, 0);
 	
 }
 
