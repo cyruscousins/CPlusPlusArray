@@ -13,6 +13,16 @@
 
 #include "array.hpp"
 
+/////////////////////
+//DOUBLE COMPARISON//
+/////////////////////
+
+#define EPSILON (1.0 / 1024.0)
+//Epsilon Comparison requires subtraction, abs(T), and < defined.
+template<typename T> bool epsilonCompare(T t0, T t1){
+  return std::abs(t0 - t1) < EPSILON;
+}
+
 ///////
 //MAX//
 ///////
@@ -229,8 +239,10 @@ template<typename T> T lInfNorm(Array<T> arr){
 #define INV_LN_2 (1.0 / 0.69314718055994528622676398299518041312694549560546875)
 //Calculates the entropy of a vector.  Has the requirement that log be defined (natural logarithm), and that the input vector sums to 1 and is strictly positive.
 template<typename T> T entropyStrictPositive(T* data, unsigned len){
+  assert(epsilonCompare<T>(sumTerms<T>(data, len), (T)1)); //Assert that data sums to 1
   double entropy = 0;
   for(unsigned i = 0; i < len; i++){
+    assert(data[i] > 0); //Assert that input is strictly positive.
     entropy += -data[i] * log(data[i]);// * INV_LN_2;
   }
   return entropy * INV_LN_2; //Want natural log above, rather than multiplying by a constant for every term just multiply out here.
@@ -240,8 +252,10 @@ template<typename T> T entropyStrictPositive(Array<T> arr){
 }
 //Calculates the entropy of a vector.  Has the requirement that log be defined (natural logarithm), and that the input vector sums to 1 and is nonnegative.
 template<typename T> T entropy(T* data, unsigned len){
+  assert(epsilonCompare<T>(sumTerms<T>(data, len), (T)1)); //Assert that data sums to 1
   double entropy = 0;
   for(unsigned i = 0; i < len; i++){
+    assert(data[i] >= 0); //Assert that input is strictly nonnegative.
     entropy += (data[i] <= 0) ? 0 : (-data[i] * log(data[i])/* * INV_LN_2 */);
   }
   return entropy * INV_LN_2;
@@ -436,16 +450,6 @@ template<typename T> void vectorMean(Array<T> out, Array<Array<T>> in){
   for(unsigned i = 0; i < out.length; i++){
     out[i] /= in.length;
   }
-}
-
-/////////////////////
-//DOUBLE COMPARISON//
-/////////////////////
-
-#define EPSILON (1.0 / 1024.0)
-//Epsilon Comparison requires subtraction, abs(T), and < defined.
-template<typename T> bool epsilonCompare(T t0, T t1){
-  return std::abs(t0 - t1) < EPSILON;
 }
 
 /////////////////////
